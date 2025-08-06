@@ -75,11 +75,20 @@ func (r *bookRepository) GetAll(ctx context.Context) ([]domain.Book, error) {
 }
 
 // GetById implements domain.BookRepository.
-func (*bookRepository) GetById(ctx context.Context, id int) (domain.Book, error) {
-	panic("unimplemented")
+func (r *bookRepository) GetById(ctx context.Context, id int) (domain.Book, error) {
+	collection := r.database.Collection(r.collection)
+	var book domain.Book
+	err := collection.FindOne(ctx, bson.M{"id": id}).Decode(&book)
+	return book, err
 }
 
 // Update implements domain.BookRepository.
-func (*bookRepository) Update(ctx context.Context, id int, book *domain.Book) error {
-	panic("unimplemented")
+func (r *bookRepository) Update(ctx context.Context, id int, book *domain.Book) error {
+	collection := r.database.Collection(r.collection)
+	_, err := collection.UpdateOne(
+		ctx,
+		bson.M{"id": id},
+		bson.M{"$set": book},
+	)
+	return err
 }
